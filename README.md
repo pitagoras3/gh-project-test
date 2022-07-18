@@ -2,5 +2,6 @@
 
 Feature 1 implementation
 
-Implemented feature 2
+Feature 2 implementation
 
+Feature 3 implementation
