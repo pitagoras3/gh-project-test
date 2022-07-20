@@ -6,3 +6,4 @@ bugfix!
 bugfix2
 
 Fixed demo bug
+Fixed demo bug 2
