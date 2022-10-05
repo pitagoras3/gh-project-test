@@ -21,7 +21,9 @@ jobs:
           fetch-depth: 0
       
       - name: Git tag
-        run: git tag ${FORCE_VERSION}
+        run: |
+          git tag ${FORCE_VERSION}
+          git push --tags
         env:
           FORCE_VERSION: ${{ github.event.inputs.forceVersion }}
       - name: Generate release notes on GitHub
