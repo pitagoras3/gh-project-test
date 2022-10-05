@@ -5,7 +5,7 @@ on:
     inputs:
       forceVersion:
         description: 'Force version'
-        required: false
+        required: true
         default: ''
 
 jobs:
