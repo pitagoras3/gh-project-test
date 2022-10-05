@@ -43,7 +43,7 @@ jobs:
         run: |
           TODAY_DD_MM_YYYY=$(date +'%d.%m.%Y')
           AUTH_HEADER="Bearer ${GITHUB_TOKEN}"
-          echo TODAY_DD_MM_YYYY
+          echo $TODAY_DD_MM_YYYY
           curl -v -X POST \
           -H "Accept: application/vnd.github+json" \
           -H "${AUTH_HEADER}" \
