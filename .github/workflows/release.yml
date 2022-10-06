@@ -47,9 +47,9 @@ jobs:
           {
             cat <<EOF
           {
-              "tag_name":"$FORCE_VERSION",
+              "tag_name":"2.0.1",
               "target_commitish":"master",
-              "name":"$FORCE_VERSION",
+              "name":"2.0.1",
               "body":"Description of the release",
               "draft":false,
               "prerelease":false,
