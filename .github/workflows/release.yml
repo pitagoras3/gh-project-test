@@ -38,8 +38,6 @@ jobs:
           git tag ${FORCE_VERSION}
           git push --tags
           sleep 10
-        env:
-          FORCE_VERSION: ${{ github.event.inputs.forceVersion }}
       - name: Generate release notes on GitHub
         run: |
           TODAY_DD_MM_YYYY=$(date +'%d.%m.%Y')
@@ -59,9 +57,11 @@ jobs:
           EOF
           }
 
-          curl \
+          curl -v \
             -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             https://api.github.com/repos/pitagoras3/gh-project-test/releases \
             -d "$(generate_post_data)"
+        env:
+          FORCE_VERSION: ${{ github.event.inputs.forceVersion }}
