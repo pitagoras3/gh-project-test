@@ -37,6 +37,7 @@ jobs:
         run: |
           git tag ${FORCE_VERSION}
           git push --tags
+          sleep 10
         env:
           FORCE_VERSION: ${{ github.event.inputs.forceVersion }}
       - name: Generate release notes on GitHub
@@ -47,9 +48,9 @@ jobs:
           {
             cat <<EOF
           {
-              "tag_name":"2.0.1",
+              "tag_name":"$FORCE_VERSION",
               "target_commitish":"master",
-              "name":"2.0.1",
+              "name":"$FORCE_VERSION",
               "body":"Description of the release",
               "draft":false,
               "prerelease":false,
