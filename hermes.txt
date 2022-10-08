@@ -7,3 +7,5 @@ bugfix2
 
 Fixed demo bug
 Fixed demo bug 2
+
+Bug 1 - fixed!
