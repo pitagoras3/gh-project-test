@@ -13,3 +13,5 @@ Feature 5 implementation
 Demo feature implementation
 
 change 1
+
+Enhancement 1
