@@ -8,23 +8,10 @@ on:
         required: true
         default: ''
 
-permissions:
-  actions: write
-  checks: write
-  contents: write
-  deployments: write
-  id-token: write
-  issues: write
-  discussions: write
-  packages: write
-  pages: write
-  pull-requests: write
-  repository-projects: write
-  security-events: write
-  statuses: write
-
 jobs:
   release:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     environment: ci
 
@@ -34,10 +21,13 @@ jobs:
           fetch-depth: 0
       
       - name: Git tag
+        id: 'next-version'
         run: |
           git tag ${FORCE_VERSION}
           git push --tags
-          sleep 10
+          NEW_APPLICATION_VERSION=${FORCE_VERSION}
+          echo "::set-output name=next_version::$NEW_APPLICATION_VERSION"
+
       - name: Generate release notes on GitHub
         run: |
           TODAY_DD_MM_YYYY=$(date +'%d.%m.%Y')
@@ -46,13 +36,12 @@ jobs:
           {
             cat <<EOF
           {
-              "tag_name":"$FORCE_VERSION",
+              "tag_name":"$APPLICATION_VERSION",
               "target_commitish":"master",
-              "name":"$FORCE_VERSION",
-              "body":"Description of the release",
+              "name":"$APPLICATION_VERSION (${TODAY_DD_MM_YYYY})",
               "draft":false,
               "prerelease":false,
-              "generate_release_notes":false
+              "generate_release_notes":true
           }
           EOF
           }
@@ -64,4 +53,4 @@ jobs:
             https://api.github.com/repos/pitagoras3/gh-project-test/releases \
             -d "$(generate_post_data)"
         env:
-          FORCE_VERSION: ${{ github.event.inputs.forceVersion }}
+          APPLICATION_VERSION: ${{ steps.next-version.outputs.next_version }}
