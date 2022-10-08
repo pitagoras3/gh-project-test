@@ -53,7 +53,8 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             https://api.github.com/repos/pitagoras3/gh-project-test/releases/generate-notes \
-            -d "$(generate_release_notes_body)")
+            -d "$(generate_release_notes_body)") \
+            | jq -r '.body'
           
           TODAY_DD_MM_YYYY=$(date +'%d.%m.%Y')
 
