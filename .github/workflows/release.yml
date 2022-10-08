@@ -34,6 +34,33 @@ jobs:
         env:
           FORCE_VERSION: ${{ github.event.inputs.forceVersion }}
 
+      - name: Generate release notes
+        id: 'release-notes'
+        run: |
+          generate_release_notes_body()
+          {
+            cat <<EOF
+          {
+              "tag_name":"$CURRENT_APPLICATION_VERSION",
+              "target_commitish":"master",
+              "previous_tag_name":"$PREVIOUS_APPLICATION_VERSION"
+          }
+          EOF
+          }
+
+          RELEASE_NOTES_MARKDOWN=$(curl -v \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/pitagoras3/gh-project-test/releases/generate-notes \
+            -d "$(generate_release_notes_body)")
+          
+          echo "::set-output name=release_notes_markdown::$RELEASE_NOTES_MARKDOWN"
+          echo $RELEASE_NOTES_MARKDOWN
+        env:
+          CURRENT_APPLICATION_VERSION: ${{ steps.next-version.outputs.next_version }}
+          PREVIOUS_APPLICATION_VERSION: ${{ steps.previoustag.outputs.tag }}
+
       - name: Create release on GitHub
         run: |
           TODAY_DD_MM_YYYY=$(date +'%d.%m.%Y')
@@ -47,7 +74,8 @@ jobs:
               "name":"$CURRENT_APPLICATION_VERSION (${TODAY_DD_MM_YYYY})",
               "draft":false,
               "prerelease":false,
-              "generate_release_notes":false
+              "generate_release_notes":false,
+              "body":"$RELEASE_NOTES_MARKDOWN"
           }
           EOF
           }
@@ -59,27 +87,6 @@ jobs:
             https://api.github.com/repos/pitagoras3/gh-project-test/releases \
             -d "$(create_release_body)"
         env:
+          RELEASE_NOTES_MARKDOWN: ${{ steps.release-notes.outputs.release_notes_markdown }}
           CURRENT_APPLICATION_VERSION: ${{ steps.next-version.outputs.next_version }}
-      
-      - name: Generate release notes on GitHub
-        run: |
-          generate_release_notes_body()
-          {
-            cat <<EOF
-          {
-              "tag_name":"$CURRENT_APPLICATION_VERSION",
-              "target_commitish":"master",
-              "previous_tag_name":"$PREVIOUS_APPLICATION_VERSION"
-          }
-          EOF
-          }
 
-          curl -v \
-            -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/pitagoras3/gh-project-test/releases/generate-notes \
-            -d "$(generate_release_notes_body)"
-        env:
-          CURRENT_APPLICATION_VERSION: ${{ steps.next-version.outputs.next_version }}
-          PREVIOUS_APPLICATION_VERSION: ${{ steps.previoustag.outputs.tag }}
