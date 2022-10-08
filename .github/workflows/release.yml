@@ -27,6 +27,8 @@ jobs:
           git push --tags
           NEW_APPLICATION_VERSION=${FORCE_VERSION}
           echo "::set-output name=next_version::$NEW_APPLICATION_VERSION"
+        env:
+          FORCE_VERSION: ${{ github.event.inputs.forceVersion }}
 
       - name: Generate release notes on GitHub
         run: |
