@@ -60,6 +60,7 @@ jobs:
             | jq -r '.body')
           
           echo "::set-output name=release_notes_markdown::$RELEASE_NOTES_MARKDOWN"
+          echo $RELEASE_NOTES_MARKDOWN
         env:
           CURRENT_APPLICATION_VERSION: ${{ steps.next-version.outputs.next_version }}
           PREVIOUS_APPLICATION_VERSION: ${{ steps.previous-version.outputs.tag }}
@@ -67,6 +68,7 @@ jobs:
       - name: Create release on GitHub
         if: github.ref == 'refs/heads/master'
         run: |
+          echo $RELEASE_NOTES_MARKDOWN
           TODAY_DD_MM_YYYY=$(date +'%d.%m.%Y')
 
           create_release_body()
