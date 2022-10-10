@@ -20,11 +20,13 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: 'Get Previous tag'
-        id: previoustag
+      - name: 'Previous version'
+        if: github.ref == 'refs/heads/master'
+        id: 'previous-version'
         uses: "WyriHaximus/github-action-get-previous-tag@v1"
 
       - name: Git tag
+        if: github.ref == 'refs/heads/master'
         id: 'next-version'
         run: |
           git tag ${FORCE_VERSION}
@@ -34,7 +36,8 @@ jobs:
         env:
           FORCE_VERSION: ${{ github.event.inputs.forceVersion }}
 
-      - name: Generate release notes and create release
+      - name: Generate release notes
+        if: github.ref == 'refs/heads/master'
         id: 'release-notes'
         run: |
           generate_release_notes_body()
@@ -56,6 +59,14 @@ jobs:
             -d "$(generate_release_notes_body)" \
             | jq -r '.body')
           
+          echo "::set-output name=release_notes_markdown::$RELEASE_NOTES_MARKDOWN"
+        env:
+          CURRENT_APPLICATION_VERSION: ${{ steps.next-version.outputs.next_version }}
+          PREVIOUS_APPLICATION_VERSION: ${{ steps.previous-version.outputs.tag }}
+      
+      - name: Create release on GitHub
+        if: github.ref == 'refs/heads/master'
+        run: |
           TODAY_DD_MM_YYYY=$(date +'%d.%m.%Y')
 
           create_release_body()
@@ -79,7 +90,6 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             https://api.github.com/repos/pitagoras3/gh-project-test/releases \
             -d "$(create_release_body)"
-
         env:
           CURRENT_APPLICATION_VERSION: ${{ steps.next-version.outputs.next_version }}
-          PREVIOUS_APPLICATION_VERSION: ${{ steps.previoustag.outputs.tag }}
+          RELEASE_NOTES_MARKDOWN: ${{ steps.release-notes.outputs.release_notes_markdown }}
