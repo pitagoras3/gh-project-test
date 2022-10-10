@@ -20,13 +20,11 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: 'Previous version'
-        if: github.ref == 'refs/heads/master'
-        id: 'previous-version'
+      - name: 'Get Previous tag'
+        id: previoustag
         uses: "WyriHaximus/github-action-get-previous-tag@v1"
 
       - name: Git tag
-        if: github.ref == 'refs/heads/master'
         id: 'next-version'
         run: |
           git tag ${FORCE_VERSION}
@@ -36,8 +34,7 @@ jobs:
         env:
           FORCE_VERSION: ${{ github.event.inputs.forceVersion }}
 
-      - name: Generate release notes
-        if: github.ref == 'refs/heads/master'
+      - name: Generate release notes and create release
         id: 'release-notes'
         run: |
           generate_release_notes_body()
@@ -50,7 +47,6 @@ jobs:
           }
           EOF
           }
-
           RELEASE_NOTES_MARKDOWN=$(curl -v \
             -X POST \
             -H "Accept: application/vnd.github+json" \
@@ -59,18 +55,7 @@ jobs:
             -d "$(generate_release_notes_body)" \
             | jq -r '.body')
           
-          echo "::set-output name=release_notes_markdown::$RELEASE_NOTES_MARKDOWN"
-          echo $RELEASE_NOTES_MARKDOWN
-        env:
-          CURRENT_APPLICATION_VERSION: ${{ steps.next-version.outputs.next_version }}
-          PREVIOUS_APPLICATION_VERSION: ${{ steps.previous-version.outputs.tag }}
-      
-      - name: Create release on GitHub
-        if: github.ref == 'refs/heads/master'
-        run: |
-          echo $RELEASE_NOTES_MARKDOWN
           TODAY_DD_MM_YYYY=$(date +'%d.%m.%Y')
-
           create_release_body()
           {
             cat <<EOF
@@ -85,7 +70,6 @@ jobs:
           }
           EOF
           }
-
           curl -v \
             -X POST \
             -H "Accept: application/vnd.github+json" \
@@ -94,4 +78,4 @@ jobs:
             -d "$(create_release_body)"
         env:
           CURRENT_APPLICATION_VERSION: ${{ steps.next-version.outputs.next_version }}
-          RELEASE_NOTES_MARKDOWN: ${{ steps.release-notes.outputs.release_notes_markdown }}
+          PREVIOUS_APPLICATION_VERSION: ${{ steps.previoustag.outputs.tag }}
